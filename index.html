@@ -21,7 +21,6 @@
             margin-top: 10px;
             max-width: 90%;
             max-height: 80vh;
-            position: absolute;
         }
 
         .controls-container {
@@ -178,23 +177,6 @@
         let isErasing = false;
         let eraserSize = 20;
         let opacity = 1;
-
-let scrollX = 0;
-let scrollY = 0;
-
-window.addEventListener('scroll', function() {
-    const newScrollX = window.scrollX;
-    const newScrollY = window.scrollY;
-    const deltaX = newScrollX - scrollX;
-    const deltaY = newScrollY - scrollY;
-
-    scrollX = newScrollX;
-    scrollY = newScrollY;
-
-    canvas.style.left = parseInt(canvas.style.left || 0) + deltaX + 'px';
-    canvas.style.top = parseInt(canvas.style.top || 0) + deltaY + 'px';
-});
-
 
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
