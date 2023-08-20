@@ -182,6 +182,70 @@
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawingTouch);
+        canvas.addEventListener('touchmove', drawTouch);
+        canvas.addEventListener('touchend', stopDrawing);
+
+function startDrawingTouch(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    if (isErasing) {
+        isDrawing = true;
+        erase(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+    } else {
+        isDrawing = true;
+        startX = touch.clientX - canvas.offsetLeft;
+        startY = touch.clientY - canvas.offsetTop;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        saveState();
+    }
+}
+
+function drawTouch(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    if (!isDrawing) return;
+    if (isErasing) {
+        erase(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(drawingHistory[historyIndex], 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = opacity;
+        if (currentShape === 'pen') {
+            ctx.lineWidth = penSize;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = penColor;
+            ctx.lineTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+            ctx.stroke();
+        } else if (currentShape === 'line' || currentShape === 'rectangle' || currentShape === 'circle') {
+            drawShapeTouch(touch);
+        }
+    }
+}
+
+function drawShapeTouch(touch) {
+    ctx.lineWidth = penSize;
+    ctx.strokeStyle = penColor;
+
+    if (currentShape === 'line') {
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+        ctx.stroke();
+    } else if (currentShape === 'rectangle') {
+        ctx.beginPath();
+        ctx.rect(startX, startY, touch.clientX - canvas.offsetLeft - startX, touch.clientY - canvas.offsetTop - startY);
+        ctx.stroke();
+    } else if (currentShape === 'circle') {
+        const radius = Math.sqrt(Math.pow(touch.clientX - canvas.offsetLeft - startX, 2) + Math.pow(touch.clientY - canvas.offsetTop - startY, 2));
+        ctx.beginPath();
+        ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+}
+
 
         function startDrawing(event) {
             if (isErasing) {
