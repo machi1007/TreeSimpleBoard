@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大樹簡易白板</title>
+    <title>大樹線上白板</title>
     <style>
         body {
             margin: 0;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
@@ -18,9 +17,10 @@
 
         canvas {
             border: 2px solid #000;
-            margin-top: 10px;
-            max-width: 90%;
-            max-height: 80vh;
+            margin: 10px;
+            width: calc(100vw - 30px);
+            height: calc(100vh - 30px);
+            max-width: 100%;
         }
 
         .controls-container {
@@ -62,6 +62,10 @@
         .controls button:hover {
             background-color: #0056b3;
         }
+
+.controls button.active {
+    background-color: #999; /* 或者任何你想要的灰色顏色 */
+}
 
         #textInput {
             width: 150px;
@@ -110,31 +114,39 @@
     <button id="toggleButton" onclick="toggleControlsPosition()">⮜</button>
     <div class="controls-container left">
         <div class="controls">
-        <h3>【大樹簡易白板功能欄】</h3>
+        <h3>【大樹線上白板功能欄】</h3>
         <label for="shapeSelector">選擇筆劃形狀：</label>
+<button onclick="changeShape('pen')">筆劃</button>
+<button onclick="changeShape('line')">直線</button>
+<button onclick="changeShape('rectangle')">矩形</button>
+<button onclick="changeShape('circle')">圓形</button>
+<button onclick="changeShape('arrow')">箭頭</button>
         <select id="shapeSelector" onchange="changeShape(this.value)">
             <option value="pen">筆劃</option>
             <option value="line">直線</option>
             <option value="rectangle">矩形</option>
             <option value="circle">圓形</option>
+            <option value="arrow">箭頭</option>
         </select>
-        <button onclick="toggleEraser()">橡皮擦(重複點選開啟關閉)</button>
-        <label for="eraserSizeSlider">調整橡皮擦範圍大小：</label>
-        <input type="range" id="eraserSizeSlider" min="5" max="50" value="20" step="1">
 
         <label for="colorPicker">選擇顏色：</label>
         <input type="color" id="colorPicker" onchange="changeColor(this.value)">
-        
         <label for="sizeSlider">選擇筆劃大小：</label>
         <input type="range" id="sizeSlider" min="1" max="10" value="2" step="1" onchange="changeSize(this.value)">
         <label for="opacitySlider">調整透明度：</label>
         <input type="range" id="opacitySlider" min="0" max="1" value="1" step="0.1" onchange="changeOpacity(this.value)">
+        <button id="eraserButton" onclick="toggleEraser()">橡皮擦(重複點選開啟關閉)</button>
+        <label for="eraserSizeSlider">調整橡皮擦範圍大小：</label>
+        <input type="range" id="eraserSizeSlider" min="5" max="50" value="20" step="1"> 
+
+        <button onclick="clearCanvas()">✖全部清除</button>
+        <button onclick="undo()">↺復原</button>
+        <button onclick="redo()">↻重做</button>        
+
         <button onclick="addText()">𝕋添加文字</button>
         <input type="text" id="textInput" style="display: none;">
                 
-        <button onclick="undo()">↺復原</button>
-        <button onclick="redo()">↻重做</button>        
-        <button onclick="clearCanvas()">✖全部清除</button>
+
 
         <button onclick="saveCanvas()">֎保存白板</button>        
         <input type="file" id="imageInput" accept="image/*" onchange="loadImage(event)">
@@ -147,6 +159,7 @@
         const canvas = document.getElementById('whiteboard');
         const ctx = canvas.getContext('2d');
 
+
         function toggleControlsPosition() {
             const controlsContainer = document.querySelector('.controls-container');
             
@@ -158,8 +171,8 @@
         }
 
         function resizeCanvas() {
-            canvas.width = window.innerWidth * 0.8;
-            canvas.height = window.innerHeight * 0.8;
+            canvas.width = window.innerWidth - 30;
+            canvas.height = window.innerHeight - 30;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -261,26 +274,29 @@ function drawShapeTouch(touch) {
             }
         }
 
-        function draw(event) {
-            if (!isDrawing) return;
-            if (isErasing) {
-                erase(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
-            } else {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.putImageData(drawingHistory[historyIndex], 0, 0);
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.globalAlpha = opacity;
-                if (currentShape === 'pen') {
-                    ctx.lineWidth = penSize;
-                    ctx.lineCap = 'round';
-                    ctx.strokeStyle = penColor;
-                    ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
-                    ctx.stroke();
-                } else if (currentShape === 'line' || currentShape === 'rectangle' || currentShape === 'circle') {
-                    drawShape(event);
-                }
-            }
+function draw(event) {
+    if (!isDrawing) return;
+    if (isErasing) {
+        erase(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(drawingHistory[historyIndex], 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = opacity;
+
+        if (currentShape === 'pen') {
+            ctx.lineWidth = penSize;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = penColor;
+            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.stroke();
+        } else if (currentShape === 'line' || currentShape === 'rectangle' || currentShape === 'circle') {
+            drawShape(event);
+        } else if (currentShape === 'arrow') {
+            drawArrow(event);
         }
+    }
+}
 
         function drawShape(event) {
             ctx.lineWidth = penSize;
@@ -359,13 +375,17 @@ function drawShapeTouch(touch) {
             }
         });
 
-        function toggleEraser() {
+function toggleEraser() {
     isErasing = !isErasing;
+
+    const eraserButton = document.getElementById('eraserButton'); // 取得橡皮擦按鈕元素
 
     if (isErasing) {
         canvas.classList.add('using-eraser');
+        eraserButton.classList.add('active'); // 添加 active 類別
     } else {
         canvas.classList.remove('using-eraser');
+        eraserButton.classList.remove('active'); // 移除 active 類別
     }
 }
 
@@ -407,6 +427,48 @@ function drawShapeTouch(touch) {
         eraserSizeSlider.addEventListener('change', function () {
             eraserSize = parseInt(eraserSizeSlider.value);
         });
+
+function changeShape(shape) {
+    currentShape = shape;
+}
+
+function drawArrow(event) {
+    if (currentShape === 'arrow') {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(drawingHistory[historyIndex], 0, 0);
+        ctx.lineWidth = penSize;
+        ctx.strokeStyle = penColor;
+
+        // Calculate arrow parameters
+        const endX = event.clientX - canvas.offsetLeft;
+        const endY = event.clientY - canvas.offsetTop;
+        const arrowLength = 3 * penSize;  // 將箭頭的長度設為筆劃大小的三倍
+        const angle = Math.atan2(endY - startY, endX - startX);
+
+        // Calculate points for the triangle
+        const triangleBaseMidX = endX - arrowLength * Math.cos(angle);
+        const triangleBaseMidY = endY - arrowLength * Math.sin(angle);
+        const triangleLeftX = triangleBaseMidX + penSize * Math.sin(angle);
+        const triangleLeftY = triangleBaseMidY - penSize * Math.cos(angle);
+        const triangleRightX = triangleBaseMidX - penSize * Math.sin(angle);
+        const triangleRightY = triangleBaseMidY + penSize * Math.cos(angle);
+
+        // Draw arrow line excluding the head
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(triangleBaseMidX, triangleBaseMidY);
+        ctx.stroke();
+
+        // Draw the triangle arrowhead
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(triangleLeftX, triangleLeftY);
+        ctx.lineTo(triangleRightX, triangleRightY);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
     </script>
 </body>
 </html>
