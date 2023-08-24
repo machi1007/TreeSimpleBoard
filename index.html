@@ -226,6 +226,7 @@ function drawTouch(event) {
         ctx.putImageData(drawingHistory[historyIndex], 0, 0);
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = opacity;
+
         if (currentShape === 'pen') {
             ctx.lineWidth = penSize;
             ctx.lineCap = 'round';
@@ -234,12 +235,49 @@ function drawTouch(event) {
             ctx.stroke();
         } else if (currentShape === 'line' || currentShape === 'rectangle' || currentShape === 'circle') {
             drawShapeTouch(touch);
+        } else if (currentShape === 'arrow') {
+            // 調用箭頭繪製函數
+            drawArrowTouch(touch);
         }
     }
 }
 
+// 箭頭繪製函數，根據觸控事件的坐標計算箭頭的位置
+function drawArrowTouch(touch) {
+    if (currentShape === 'arrow') {
+        const endX = touch.clientX - canvas.offsetLeft;
+        const endY = touch.clientY - canvas.offsetTop;
+
+        const arrowLength = 5 * penSize; // 放大箭頭的長度
+        const angle = Math.atan2(endY - startY, endX - startX);
+
+        // 計算放大的箭頭三角形頂點
+        const triangleBaseMidX = endX - arrowLength * Math.cos(angle);
+        const triangleBaseMidY = endY - arrowLength * Math.sin(angle);
+        const triangleLeftX = triangleBaseMidX + penSize * 2 * Math.sin(angle); // 放大箭頭的寬度
+        const triangleLeftY = triangleBaseMidY - penSize * 2 * Math.cos(angle); // 放大箭頭的寬度
+        const triangleRightX = triangleBaseMidX - penSize * 2 * Math.sin(angle); // 放大箭頭的寬度
+        const triangleRightY = triangleBaseMidY + penSize * 2 * Math.cos(angle); // 放大箭頭的寬度
+
+        // 繪製放大的箭頭線
+        ctx.lineWidth = penSize * 1.5; // 放大筆劃的寬度
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(triangleBaseMidX, triangleBaseMidY);
+        ctx.stroke();
+
+        // 繪製放大的箭頭三角形
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(triangleLeftX, triangleLeftY);
+        ctx.lineTo(triangleRightX, triangleRightY);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
 function drawShapeTouch(touch) {
-    ctx.lineWidth = penSize;
+    ctx.lineWidth = penSize * 1.5; // 放大筆劃的寬度
     ctx.strokeStyle = penColor;
 
     if (currentShape === 'line') {
@@ -434,32 +472,28 @@ function changeShape(shape) {
 
 function drawArrow(event) {
     if (currentShape === 'arrow') {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.putImageData(drawingHistory[historyIndex], 0, 0);
-        ctx.lineWidth = penSize;
-        ctx.strokeStyle = penColor;
-
-        // Calculate arrow parameters
         const endX = event.clientX - canvas.offsetLeft;
         const endY = event.clientY - canvas.offsetTop;
-        const arrowLength = 3 * penSize;  // 將箭頭的長度設為筆劃大小的三倍
+
+        const arrowLength = 5 * penSize; // 放大箭頭的長度
         const angle = Math.atan2(endY - startY, endX - startX);
 
-        // Calculate points for the triangle
+        // 計算放大的箭頭三角形頂點
         const triangleBaseMidX = endX - arrowLength * Math.cos(angle);
         const triangleBaseMidY = endY - arrowLength * Math.sin(angle);
-        const triangleLeftX = triangleBaseMidX + penSize * Math.sin(angle);
-        const triangleLeftY = triangleBaseMidY - penSize * Math.cos(angle);
-        const triangleRightX = triangleBaseMidX - penSize * Math.sin(angle);
-        const triangleRightY = triangleBaseMidY + penSize * Math.cos(angle);
+        const triangleLeftX = triangleBaseMidX + penSize * 2 * Math.sin(angle); // 放大箭頭的寬度
+        const triangleLeftY = triangleBaseMidY - penSize * 2 * Math.cos(angle); // 放大箭頭的寬度
+        const triangleRightX = triangleBaseMidX - penSize * 2 * Math.sin(angle); // 放大箭頭的寬度
+        const triangleRightY = triangleBaseMidY + penSize * 2 * Math.cos(angle); // 放大箭頭的寬度
 
-        // Draw arrow line excluding the head
+        // 繪製放大的箭頭線
+        ctx.lineWidth = penSize * 1.5; // 放大筆劃的寬度
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(triangleBaseMidX, triangleBaseMidY);
         ctx.stroke();
 
-        // Draw the triangle arrowhead
+        // 繪製放大的箭頭三角形
         ctx.beginPath();
         ctx.moveTo(endX, endY);
         ctx.lineTo(triangleLeftX, triangleLeftY);
