@@ -36,22 +36,31 @@
             transition: left 0.3s ease-in-out;
             z-index: 10;
             box-shadow: 2px 0px 10px rgba(0,0,0,0.1);
+            overflow-y: auto; /* 添加垂直滾動條 */
         }
 
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
+.controls-scroll-container {
+    max-height: 100vh;
+    overflow-y: auto;
+}
 
-        .controls label {
-            margin-bottom: 5px;
-        }
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%; /* 控制區域寬度使用百分比 */
+    padding-right: 10px; /* 調整內部內距 */
+}
+
+.controls label {
+    margin-bottom: 5px;
+    font-size: 1vw; /* 使用相對單位設定文字大小 */
+}
 
         .controls button {
             margin-top: 5px;
-            padding: 5px 15px;
-            font-size: 14px;
+    padding: 0.5vw 0.6vw; /* 使用相對單位設定按鈕尺寸 */
+    font-size: 1vw; /* 使用相對單位設定按鈕文字大小 */
             background-color: #007BFF;
             color: #fff;
             border: none;
@@ -74,7 +83,7 @@
 #toggleButton {
     position: fixed;
     top: 50%;
-    left: -20px; /* 這個值可能需要調整，以便完整顯示按鈕 */
+    left: -6px; /* 這個值可能需要調整，以便完整顯示按鈕 */
     transform: translateY(-50%);
     z-index: 20;
     background-color: #007BFF;
@@ -82,23 +91,10 @@
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
-    padding: 10px;
+    padding: 5px;
 }
 
-        @media (max-width: 768px) {
-            #toggleButton {
-                top: auto;
-                bottom: 20px;
-                right: 50%;
-                transform: translateX(50%);
-            }
-        }
 
-        @media (max-width: 576px) {
-            #toggleButton {
-                bottom: 10px;
-            }
-        }
 
         .controls-container.left {
             left: 0;
@@ -107,12 +103,14 @@
 .using-eraser {
     cursor: crosshair;
 }
+
     </style>
 </head>
 <body>
     <canvas id="whiteboard"></canvas>
     <button id="toggleButton" onclick="toggleControlsPosition()">⮜</button>
     <div class="controls-container left">
+     <div class="controls-scroll-container">
         <div class="controls">
         <h3>【大樹線上白板功能欄】</h3>
         <label for="shapeSelector">選擇筆劃形狀：</label>
@@ -153,7 +151,7 @@
 
         </div>
     </div>
-
+</div>
 
     <script>
         const canvas = document.getElementById('whiteboard');
