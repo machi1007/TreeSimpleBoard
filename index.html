@@ -94,6 +94,64 @@
     padding: 5px;
 }
 
+#clearButton {
+    position: fixed;
+    top: 20.5%;
+    left: -2.5px; /* 這個值可能需要調整，以便完整顯示按鈕 */
+    transform: translateY(-50%);
+    z-index: 20;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    padding: 5px;
+}
+
+#undoButton {
+    position: fixed;
+    top: 35%;
+    left: -5.5px; /* 這個值可能需要調整，以便完整顯示按鈕 */
+    transform: translateY(-50%);
+    z-index: 20;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    padding: 5px;
+}
+
+#redoButton {
+    position: fixed;
+    top: 65%;
+    left: -5.5px; /* 這個值可能需要調整，以便完整顯示按鈕 */
+    transform: translateY(-50%);
+    z-index: 20;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    padding: 5px;
+}
+
+#neraserButton {
+    position: fixed;
+    top: 80%;
+    left: -5.5px; /* 這個值可能需要調整，以便完整顯示按鈕 */
+    transform: translateY(-50%);
+    z-index: 20;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    padding: 5px;
+}
+#neraserButton.active {
+    background-color: #999; /* 或者任何你想要的灰色顏色 */
+}
 
 
         .controls-container.left {
@@ -109,6 +167,10 @@
 <body>
     <canvas id="whiteboard"></canvas>
     <button id="toggleButton" onclick="toggleControlsPosition()">⮜</button>
+    <button id="clearButton" onclick="clearCanvas()"><b>c</b></button>
+    <button id="undoButton" onclick="undo()"><b>↺</b></button>
+    <button id="redoButton" onclick="redo()"><b>↻</b></button>
+    <button id="neraserButton" onclick="toggleEraser()">∎</button>
     <div class="controls-container left">
      <div class="controls-scroll-container">
         <div class="controls">
@@ -135,11 +197,11 @@
         <input type="range" id="opacitySlider" min="0" max="1" value="1" step="0.1" onchange="changeOpacity(this.value)">
         <button id="eraserButton" onclick="toggleEraser()">橡皮擦(重複點選開啟關閉)</button>
         <label for="eraserSizeSlider">調整橡皮擦範圍大小：</label>
-        <input type="range" id="eraserSizeSlider" min="5" max="50" value="20" step="1"> 
+        <input type="range" id="eraserSizeSlider" min="5" max="500" value="5" step="1"> 
 
         <button onclick="clearCanvas()">✖全部清除</button>
-        <button onclick="undo()">↺復原</button>
-        <button onclick="redo()">↻重做</button>        
+        <button onclick="undo()"><b>↺</b>復原</button>
+        <button onclick="redo()"><b>↻</b>重做</button>        
 
         <button onclick="addText()">𝕋添加文字</button>
         <input type="text" id="textInput" style="display: none;">
@@ -415,13 +477,16 @@ function toggleEraser() {
     isErasing = !isErasing;
 
     const eraserButton = document.getElementById('eraserButton'); // 取得橡皮擦按鈕元素
+    const neraserButton = document.getElementById('neraserButton');
 
     if (isErasing) {
         canvas.classList.add('using-eraser');
         eraserButton.classList.add('active'); // 添加 active 類別
+        neraserButton.classList.add('active');
     } else {
         canvas.classList.remove('using-eraser');
         eraserButton.classList.remove('active'); // 移除 active 類別
+        neraserButton.classList.remove('active');
     }
 }
 
